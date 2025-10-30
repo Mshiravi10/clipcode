@@ -1,0 +1,291 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String            @id @default(cuid())
+  name          String?
+  email         String?           @unique
+  emailVerified DateTime?
+  image         String?
+  role          String            @default("user")
+  accounts      Account[]
+  sessions      Session[]
+  snippets      Snippet[]         @relation("UserSnippets")
+  collections   Collection[]
+  favorites     Favorite[]
+  auditLogs     AuditLog[]
+  errorLogs     ErrorLog[]
+  preferences   UserPreferences?
+  projects      SnippetProject[]
+  executions    SnippetExecution[]
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+}
+
+model Snippet {
+  id           String             @id @default(cuid())
+  ownerId      String
+  owner        User               @relation(fields: [ownerId], references: [id], onDelete: Cascade, name: "UserSnippets")
+  title        String
+  slug         String             @unique
+  language     String
+  framework    String?
+  description  String?
+  code         String             @db.Text
+  placeholders String?
+  isFavorite   Boolean            @default(false)
+  isEncrypted  Boolean            @default(false)
+  isPublic     Boolean            @default(false)
+  usageCount   Int                @default(0)
+  viewCount    Int                @default(0)
+  executeCount Int                @default(0)
+  simhash      String?
+  gistId       String?
+  gistUrl      String?
+  collectionId String?
+  collection   Collection?        @relation(fields: [collectionId], references: [id], onDelete: SetNull)
+  tags         SnippetTag[]
+  favorites    Favorite[]
+  versions     SnippetVersion[]
+  executions   SnippetExecution[]
+  projectFiles ProjectFile[]
+  tsv          Unsupported("tsvector")?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  @@index([ownerId])
+  @@index([language])
+  @@index([framework])
+  @@index([collectionId])
+  @@index([simhash])
+  @@index([gistId])
+  @@index([isPublic])
+}
+
+model Tag {
+  id        String       @id @default(cuid())
+  name      String       @unique
+  slug      String       @unique
+  snippets  SnippetTag[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model SnippetTag {
+  snippetId String
+  tagId     String
+  snippet   Snippet @relation(fields: [snippetId], references: [id], onDelete: Cascade)
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([snippetId, tagId])
+  @@index([snippetId])
+  @@index([tagId])
+}
+
+model Collection {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  ownerId   String
+  owner     User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  isPublic  Boolean   @default(false)
+  snippets  Snippet[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([ownerId])
+  @@index([isPublic])
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  snippetId String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  snippet   Snippet  @relation(fields: [snippetId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, snippetId])
+  @@index([userId])
+  @@index([snippetId])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String
+  entity    String
+  entityId  String?
+  meta      String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([entity])
+  @@index([createdAt])
+}
+
+model ErrorLog {
+  id           String   @id @default(cuid())
+  level        String
+  message      String
+  stackTrace   String?  @db.Text
+  context      String?  @db.Text
+  userId       String?
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  sessionData  String?  @db.Text
+  requestBody  String?  @db.Text
+  responseData String?  @db.Text
+  environment  String?
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime @default(now())
+
+  @@index([level])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model Account {
+  id                    String  @id @default(cuid())
+  userId                String
+  type                  String
+  provider              String
+  providerAccountId     String
+  refresh_token         String? @db.Text
+  access_token          String? @db.Text
+  expires_at            Int?
+  token_type            String?
+  scope                 String?
+  id_token              String? @db.Text
+  session_state         String?
+  refresh_token_expires_in Int?
+  user                  User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model SnippetVersion {
+  id          String   @id @default(cuid())
+  snippetId   String
+  snippet     Snippet  @relation(fields: [snippetId], references: [id], onDelete: Cascade)
+  version     Int
+  title       String
+  code        String   @db.Text
+  description String?  @db.Text
+  language    String
+  framework   String?
+  createdBy   String
+  createdAt   DateTime @default(now())
+
+  @@unique([snippetId, version])
+  @@index([snippetId])
+  @@index([createdAt])
+}
+
+model UserPreferences {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  theme               String   @default("system")
+  defaultLanguage     String?
+  duplicateThreshold  Float    @default(0.85)
+  enableEncryption    Boolean  @default(false)
+  encryptionKeyHash   String?
+  gistToken           String?
+  autoSync            Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Log {
+  id        String   @id @default(cuid())
+  level     String   // info, warn, error, debug
+  message   String
+  context   String?  @db.Text
+  source    String?  // auth, api, system, etc.
+  userId    String?
+  createdAt DateTime @default(now())
+
+  @@index([level])
+  @@index([source])
+  @@index([createdAt])
+  @@index([userId])
+}
+
+model SnippetExecution {
+  id        String   @id @default(cuid())
+  snippetId String
+  snippet   Snippet  @relation(fields: [snippetId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  input     String?  @db.Text
+  output    String?  @db.Text
+  error     String?  @db.Text
+  duration  Int      // execution time in ms
+  language  String
+  createdAt DateTime @default(now())
+
+  @@index([snippetId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model SnippetProject {
+  id          String        @id @default(cuid())
+  name        String
+  slug        String        @unique
+  description String?       @db.Text
+  ownerId     String
+  owner       User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  files       ProjectFile[]
+  mainFileId  String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([ownerId])
+  @@index([slug])
+}
+
+model ProjectFile {
+  id        String         @id @default(cuid())
+  projectId String
+  project   SnippetProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  snippetId String
+  snippet   Snippet        @relation(fields: [snippetId], references: [id], onDelete: Cascade)
+  filename  String
+  order     Int            @default(0)
+  createdAt DateTime       @default(now())
+
+  @@index([projectId])
+  @@index([snippetId])
+}
+
+
