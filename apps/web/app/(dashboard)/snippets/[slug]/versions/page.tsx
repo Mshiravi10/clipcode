@@ -9,7 +9,7 @@ import { ArrowLeft, History, RotateCcw } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 interface Version {
@@ -25,7 +25,7 @@ interface Version {
 }
 
 export default function VersionHistoryPage() {
-    const params = useParams();
+    const params = useParams<{ slug: string }>()!;
     const router = useRouter();
     const { data: session, status } = useSession();
     const [versions, setVersions] = useState<Version[]>([]);
@@ -34,18 +34,7 @@ export default function VersionHistoryPage() {
     const [selectedVersion2, setSelectedVersion2] = useState<Version | null>(null);
     const [showComparison, setShowComparison] = useState(false);
 
-    useEffect(() => {
-        if (status === 'loading') return;
-
-        if (!session) {
-            router.push('/auth/signin');
-            return;
-        }
-
-        fetchVersions();
-    }, [params.slug, session, status, router]);
-
-    async function fetchVersions() {
+    const fetchVersions = useCallback(async () => {
         try {
             const response = await fetch(`/api/snippets/${params.slug}/versions`);
             if (!response.ok) {
@@ -64,7 +53,18 @@ export default function VersionHistoryPage() {
         } finally {
             setLoading(false);
         }
-    }
+    }, [params.slug]);
+
+    useEffect(() => {
+        if (status === 'loading') return;
+
+        if (!session) {
+            router.push('/auth/signin');
+            return;
+        }
+
+        fetchVersions();
+    }, [fetchVersions, session, status, router]);
 
     async function handleRestore(versionId: string) {
         if (!confirm('Are you sure you want to restore this version? This will create a new version with this code.')) {

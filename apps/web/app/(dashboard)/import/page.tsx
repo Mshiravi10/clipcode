@@ -36,7 +36,7 @@ export default function ImportPage() {
             const data = await response.json();
             toast.success(`Successfully imported ${data.data.imported} snippet(s)`);
             setFile(null);
-        } catch (error) {
+        } catch (_error) {
             toast.error('Failed to import snippets');
         } finally {
             setLoading(false);

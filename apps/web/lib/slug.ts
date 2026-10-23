@@ -25,9 +25,12 @@ export async function generateUniqueSlug(
 }
 
 async function checkSlugExists(slug: string, type: 'snippet' | 'collection' | 'tag'): Promise<boolean> {
-    const count = await prisma[type].count({
-        where: { slug },
-    });
+    const count = type === 'snippet'
+        ? await prisma.snippet.count({ where: { slug } })
+        : type === 'collection'
+            ? await prisma.collection.count({ where: { slug } })
+            : await prisma.tag.count({ where: { slug } });
+
     return count > 0;
 }
 

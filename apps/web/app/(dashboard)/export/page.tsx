@@ -36,7 +36,7 @@ export default function ExportPage() {
             document.body.removeChild(a);
 
             toast.success('Export complete!');
-        } catch (error) {
+        } catch (_error) {
             toast.error('Failed to export snippets');
         } finally {
             setLoading(false);

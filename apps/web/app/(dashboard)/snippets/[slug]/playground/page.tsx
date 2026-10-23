@@ -23,7 +23,7 @@ interface SnippetData {
 }
 
 export default function PlaygroundPage() {
-    const params = useParams();
+    const params = useParams<{ slug: string }>()!;
     const router = useRouter();
     const { data: session, status } = useSession();
     const [snippet, setSnippet] = useState<SnippetData | null>(null);

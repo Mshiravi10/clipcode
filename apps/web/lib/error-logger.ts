@@ -11,6 +11,7 @@ export interface LogContext {
     responseData?: any;
     ipAddress?: string;
     userAgent?: string;
+    deletedCount?: number;
 }
 
 function safeStringify(obj: any): string | null {
@@ -26,7 +27,7 @@ function safeStringify(obj: any): string | null {
             }
             return val;
         }, 2);
-    } catch (error) {
+    } catch (_error) {
         return String(obj);
     }
 }

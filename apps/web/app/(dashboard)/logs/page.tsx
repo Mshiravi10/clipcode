@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Download, RefreshCw, Trash2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 interface Log {
     id: string;
@@ -43,7 +43,7 @@ export default function LogsPage() {
     const [pagination, setPagination] = useState<LogsResponse['pagination'] | null>(null);
     const [expandedLog, setExpandedLog] = useState<string | null>(null);
 
-    const fetchLogs = async () => {
+    const fetchLogs = useCallback(async () => {
         setLoading(true);
         try {
             const params = new URLSearchParams({
@@ -62,11 +62,11 @@ export default function LogsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [page, level, search]);
 
     useEffect(() => {
         fetchLogs();
-    }, [page, level, search]);
+    }, [fetchLogs]);
 
     const getLevelColor = (level: string) => {
         switch (level) {

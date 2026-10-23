@@ -4,13 +4,12 @@ import { SignInButton } from '@/components/auth/signin-button';
 import { Button } from '@/components/ui/button';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
 
-export default function SignInPage() {
-    const router = useRouter();
+function SignInContent() {
     const { data: session, status } = useSession();
-    const searchParams = useSearchParams();
+    const searchParams = useSearchParams()!;
     const error = searchParams.get('error');
     const callbackUrl = searchParams.get('callbackUrl') || '/';
     const [isRedirecting, setIsRedirecting] = useState(false);
@@ -99,5 +98,19 @@ export default function SignInPage() {
                 </p>
             </div>
         </div>
+    );
+}
+
+export default function SignInPage() {
+    return (
+        <Suspense
+            fallback={
+                <div className="flex min-h-screen items-center justify-center">
+                    <p className="text-muted-foreground">Loading sign in...</p>
+                </div>
+            }
+        >
+            <SignInContent />
+        </Suspense>
     );
 }

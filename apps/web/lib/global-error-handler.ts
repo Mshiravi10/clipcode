@@ -1,6 +1,6 @@
 import { logError } from './error-logger';
 
-let logQueue: Array<{ message: string; error: Error; context?: any }> = [];
+const logQueue: Array<{ message: string; error: Error; context?: any }> = [];
 let isProcessing = false;
 let lastLogTime = 0;
 const LOG_THROTTLE_MS = 1000;

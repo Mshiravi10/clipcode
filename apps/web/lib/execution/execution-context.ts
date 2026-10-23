@@ -67,7 +67,7 @@ export class ExecutionContext {
 
         try {
             return JSON.stringify(value, null, 2);
-        } catch (e) {
+        } catch (_error) {
             return String(value);
         }
     }

@@ -4,7 +4,7 @@ import { EmptyState } from '@/components/empty-state';
 import { Filters } from '@/components/filters';
 import { LoadingSkeleton } from '@/components/loading-skeleton';
 import { SnippetCard } from '@/components/snippet-card';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 export default function ExplorePage() {
@@ -16,12 +16,7 @@ export default function ExplorePage() {
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [availableTags, setAvailableTags] = useState<any[]>([]);
 
-    useEffect(() => {
-        fetchPublicSnippets();
-        fetchTags();
-    }, [searchQuery, language, framework, selectedTags]);
-
-    async function fetchPublicSnippets() {
+    const fetchPublicSnippets = useCallback(async () => {
         setLoading(true);
         try {
             const params = new URLSearchParams();
@@ -46,19 +41,24 @@ export default function ExplorePage() {
         } finally {
             setLoading(false);
         }
-    }
+    }, [searchQuery, language, framework, selectedTags]);
 
-    async function fetchTags() {
+    const fetchTags = useCallback(async () => {
         try {
             const response = await fetch('/api/tags');
             if (response.ok) {
                 const data = await response.json();
                 setAvailableTags(data.data || []);
             }
-        } catch (error) {
+        } catch (_error) {
             console.error('Failed to fetch tags');
         }
-    }
+    }, []);
+
+    useEffect(() => {
+        fetchPublicSnippets();
+        fetchTags();
+    }, [fetchPublicSnippets, fetchTags]);
 
     async function handleCopy(snippet: any) {
         try {

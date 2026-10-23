@@ -15,11 +15,6 @@ export const prisma =
                     { level: 'warn', emit: 'stdout' },
                 ]
                 : ['error'],
-        datasources: {
-            db: {
-                url: process.env.DATABASE_URL,
-            },
-        },
     });
 
 // Query logging in development

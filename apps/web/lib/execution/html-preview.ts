@@ -8,7 +8,7 @@ import { ExecutionContext, ExecutionResult } from './execution-context';
 export class HTMLPreviewRunner {
     private iframe: HTMLIFrameElement | null = null;
 
-    async execute(html: string, css?: string, js?: string): Promise<ExecutionResult> {
+    async execute(_html: string, _css?: string, _js?: string): Promise<ExecutionResult> {
         const context = new ExecutionContext({ captureConsole: false });
         context.start();
 

@@ -19,7 +19,7 @@ export const authOptions: NextAuthOptions = {
         }),
     ],
     callbacks: {
-        async jwt({ token, user, account, profile }) {
+        async jwt({ token, user, account: _account, profile }) {
             // On sign in, add user info to token
             if (user) {
                 const email = user.email || (profile as any)?.email;
@@ -57,7 +57,7 @@ export const authOptions: NextAuthOptions = {
             }
             return session;
         },
-        async signIn({ user, account, profile }) {
+        async signIn({ user, account: _account, profile }) {
             console.log('🔐 SignIn Callback - User:', user?.email || 'No email');
             console.log('🔍 Profile data:', JSON.stringify(profile, null, 2));
 

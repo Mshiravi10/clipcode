@@ -1,5 +1,6 @@
 import { Liquid } from 'liquidjs';
 import slugify from 'slugify';
+import { randomUUID } from 'crypto';
 
 // Initialize Liquid engine
 const liquid = new Liquid({
@@ -58,18 +59,18 @@ liquid.registerFilter('now', () => {
     return new Date().toISOString();
 });
 
-liquid.registerFilter('date', (input: string, format: string = 'YYYY-MM-DD') => {
+liquid.registerFilter('date', (input: string, _format: string = 'YYYY-MM-DD') => {
     const date = new Date(input);
     // Basic date formatting
     return date.toISOString().split('T')[0];
 });
 
 liquid.registerFilter('guid', () => {
-    return crypto.randomUUID();
+    return randomUUID();
 });
 
 liquid.registerFilter('uuid', () => {
-    return crypto.randomUUID();
+    return randomUUID();
 });
 
 liquid.registerFilter('timestamp', () => {

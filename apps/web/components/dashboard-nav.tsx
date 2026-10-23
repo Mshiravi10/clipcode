@@ -59,7 +59,7 @@ const navItems = [
 ];
 
 export function DashboardNav() {
-    const pathname = usePathname();
+    const pathname = usePathname() ?? '';
     const { data: session } = useSession();
     const [isAdmin, setIsAdmin] = useState(false);
 

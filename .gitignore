@@ -13,3 +13,6 @@ coverage
 .vercel
 *.pem
 
+# Local codebase index
+.codebase-memory/
+

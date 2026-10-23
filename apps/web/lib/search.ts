@@ -67,12 +67,7 @@ export async function searchSnippets(
             .map(word => `${word}:*`)
             .join(' & ');
 
-        where.OR = [
-            {
-                tsv: {
-                    not: undefined,
-                },
-            },
+        const textFilters: Prisma.SnippetWhereInput[] = [
             {
                 title: {
                     contains: searchQuery,
@@ -103,7 +98,7 @@ export async function searchSnippets(
                 );
 
                 if (fullTextResults.length > 0) {
-                    where.OR.push({
+                    textFilters.push({
                         id: {
                             in: fullTextResults.map(r => r.id),
                         },
@@ -113,6 +108,8 @@ export async function searchSnippets(
                 console.error('Full-text search error:', error);
             }
         }
+
+        where.OR = textFilters;
     }
 
     if (language) {

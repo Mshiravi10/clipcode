@@ -32,7 +32,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 export default function EditCollectionPage() {
     const router = useRouter();
-    const params = useParams();
+    const params = useParams<{ slug: string }>()!;
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [collectionId, setCollectionId] = useState<string>('');

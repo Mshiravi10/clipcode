@@ -74,7 +74,7 @@ export function CollectionCard({
 
             toast.success('Collection deleted');
             router.refresh();
-        } catch (error) {
+        } catch (_error) {
             toast.error('Failed to delete collection');
         } finally {
             setIsDeleting(false);
@@ -164,7 +164,7 @@ export function CollectionCard({
                     <AlertDialogHeader>
                         <AlertDialogTitle>Delete Collection?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Are you sure you want to delete "{collection.name}"? This action
+                            Are you sure you want to delete &quot;{collection.name}&quot;? This action
                             cannot be undone. Snippets in this collection will not be deleted.
                         </AlertDialogDescription>
                     </AlertDialogHeader>

@@ -7,7 +7,7 @@ import { SnippetCard } from '@/components/snippet-card';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 export default function SnippetsPage() {
@@ -19,12 +19,7 @@ export default function SnippetsPage() {
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [availableTags, setAvailableTags] = useState<any[]>([]);
 
-    useEffect(() => {
-        fetchSnippets();
-        fetchTags();
-    }, [searchQuery, language, framework, selectedTags]);
-
-    async function fetchSnippets() {
+    const fetchSnippets = useCallback(async () => {
         setLoading(true);
         try {
             const params = new URLSearchParams();
@@ -36,24 +31,29 @@ export default function SnippetsPage() {
             const response = await fetch(`/api/snippets?${params}`);
             const data = await response.json();
             setSnippets(data.data.snippets || []);
-        } catch (error) {
+        } catch (_error) {
             toast.error('Failed to fetch snippets');
         } finally {
             setLoading(false);
         }
-    }
+    }, [searchQuery, language, framework, selectedTags]);
 
-    async function fetchTags() {
+    const fetchTags = useCallback(async () => {
         try {
             const response = await fetch('/api/tags');
             if (response.ok) {
                 const data = await response.json();
                 setAvailableTags(data.data || []);
             }
-        } catch (error) {
+        } catch (_error) {
             console.error('Failed to fetch tags');
         }
-    }
+    }, []);
+
+    useEffect(() => {
+        fetchSnippets();
+        fetchTags();
+    }, [fetchSnippets, fetchTags]);
 
     async function handleCopy(snippet: any) {
         try {
@@ -100,7 +100,7 @@ export default function SnippetsPage() {
                 )
             );
             toast.success(data.data.isFavorite ? 'Added to favorites' : 'Removed from favorites');
-        } catch (error) {
+        } catch (_error) {
             toast.error('Failed to toggle favorite');
         }
     }

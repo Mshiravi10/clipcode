@@ -126,7 +126,7 @@ export async function GET(
         if (validation.valid) {
             try {
                 preview = await renderTemplatePreview(snippet.code);
-            } catch (error) {
+            } catch (_error) {
                 // Preview generation failed, but that's okay
                 preview = null;
             }
